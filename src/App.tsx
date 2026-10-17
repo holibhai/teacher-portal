@@ -18,6 +18,7 @@ import { GlobalSearchModal } from './teacher/components/GlobalSearchModal';
 import { QuickCreateModal, QuickCreateType } from './teacher/components/QuickCreateModal';
 
 import { TeacherLoginPage } from './teacher/auth/TeacherLoginPage';
+import { TeacherForgotPasswordPage } from './teacher/auth/TeacherForgotPasswordPage';
 import { TeacherProfile } from './teacher/types';
 
 // Views
@@ -46,6 +47,8 @@ export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     return localStorage.getItem('mentify_teacher_auth') === 'true';
   });
+  const [authView, setAuthView] = useState<'login' | 'forgot-password'>('login');
+  const [recoveryEmail, setRecoveryEmail] = useState<string>('alex.rivera@mentify.edu');
   const [currentTeacher, setCurrentTeacher] = useState<TeacherProfile>(mockTeacherProfile);
   const [currentTab, setCurrentTab] = useState<NavigationTab>('dashboard');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -139,12 +142,34 @@ export default function App() {
 
   const handleLogout = () => {
     setIsAuthenticated(false);
+    setAuthView('login');
     localStorage.removeItem('mentify_teacher_auth');
     setCurrentTab('dashboard');
   };
 
   if (!isAuthenticated) {
-    return <TeacherLoginPage onLogin={handleLogin} />;
+    if (authView === 'forgot-password') {
+      return (
+        <TeacherForgotPasswordPage
+          initialEmail={recoveryEmail}
+          onBackToLogin={() => setAuthView('login')}
+          onPasswordResetSuccess={(profile) => {
+            setAuthView('login');
+            handleLogin(profile);
+          }}
+        />
+      );
+    }
+
+    return (
+      <TeacherLoginPage
+        onLogin={handleLogin}
+        onForgotPassword={(currentEmail) => {
+          if (currentEmail) setRecoveryEmail(currentEmail);
+          setAuthView('forgot-password');
+        }}
+      />
+    );
   }
 
   return (

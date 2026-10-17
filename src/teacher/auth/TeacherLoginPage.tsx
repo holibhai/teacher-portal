@@ -19,9 +19,13 @@ import { mockTeacherProfile } from '../data/mockData';
 
 interface TeacherLoginPageProps {
   onLogin: (teacher?: TeacherProfile) => void;
+  onForgotPassword?: (email?: string) => void;
 }
 
-export const TeacherLoginPage: React.FC<TeacherLoginPageProps> = ({ onLogin }) => {
+export const TeacherLoginPage: React.FC<TeacherLoginPageProps> = ({
+  onLogin,
+  onForgotPassword,
+}) => {
   // Screen mode: 'login' or 'forgot-password'
   const [authMode, setAuthMode] = useState<'login' | 'forgot-password'>('login');
 
@@ -253,10 +257,14 @@ export const TeacherLoginPage: React.FC<TeacherLoginPageProps> = ({ onLogin }) =
                         <button
                           type="button"
                           onClick={() => {
-                            setForgotEmail(email);
-                            setForgotSubmitted(false);
-                            setForgotError('');
-                            setAuthMode('forgot-password');
+                            if (onForgotPassword) {
+                              onForgotPassword(email);
+                            } else {
+                              setForgotEmail(email);
+                              setForgotSubmitted(false);
+                              setForgotError('');
+                              setAuthMode('forgot-password');
+                            }
                           }}
                           className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
                         >
