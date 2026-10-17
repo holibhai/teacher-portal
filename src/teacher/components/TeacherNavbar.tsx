@@ -29,6 +29,7 @@ interface TeacherNavbarProps {
   onOpenSearch: () => void;
   onOpenQuickCreate: (type: QuickCreateType) => void;
   onToggleMobileMenu: () => void;
+  onLogout: () => void;
   teacher: TeacherProfile;
   unreadNotificationsCount: number;
 }
@@ -61,6 +62,7 @@ export const TeacherNavbar: React.FC<TeacherNavbarProps> = ({
   onOpenSearch,
   onOpenQuickCreate,
   onToggleMobileMenu,
+  onLogout,
   teacher,
   unreadNotificationsCount,
 }) => {
@@ -317,6 +319,16 @@ export const TeacherNavbar: React.FC<TeacherNavbarProps> = ({
                 <div className="px-3 py-1.5 text-[11px] text-slate-400">
                   Keycloak Session: <span className="text-emerald-600 font-medium">Active (SSO)</span>
                 </div>
+                <button
+                  onClick={() => {
+                    setProfileMenuOpen(false);
+                    onLogout();
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-rose-600 hover:bg-rose-50 transition-colors text-left font-medium"
+                >
+                  <LogOut className="w-4 h-4 text-rose-500" />
+                  <span>Sign Out</span>
+                </button>
               </div>
             </div>
           )}

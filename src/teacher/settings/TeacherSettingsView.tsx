@@ -12,7 +12,11 @@ import {
 } from 'lucide-react';
 import { mockTeacherProfile } from '../data/mockData';
 
-export const TeacherSettingsView: React.FC = () => {
+interface TeacherSettingsViewProps {
+  onLogout?: () => void;
+}
+
+export const TeacherSettingsView: React.FC<TeacherSettingsViewProps> = ({ onLogout }) => {
   const [emailAlerts, setEmailAlerts] = useState(true);
   const [submissionPushes, setSubmissionPushes] = useState(true);
   const [dailyDigest, setDailyDigest] = useState(false);
@@ -151,8 +155,14 @@ export const TeacherSettingsView: React.FC = () => {
         </p>
 
         <button
-          onClick={() => alert('Logging out of Mentify Teacher Portal...')}
-          className="px-3.5 py-2 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition-colors flex items-center gap-1.5"
+          onClick={() => {
+            if (onLogout) {
+              onLogout();
+            } else {
+              alert('Logging out of Mentify Teacher Portal...');
+            }
+          }}
+          className="px-3.5 py-2 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
         >
           <LogOut className="w-3.5 h-3.5" />
           <span>Sign Out of Faculty Workspace</span>

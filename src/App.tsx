@@ -17,6 +17,9 @@ import { TeacherNavbar } from './teacher/components/TeacherNavbar';
 import { GlobalSearchModal } from './teacher/components/GlobalSearchModal';
 import { QuickCreateModal, QuickCreateType } from './teacher/components/QuickCreateModal';
 
+import { TeacherLoginPage } from './teacher/auth/TeacherLoginPage';
+import { TeacherProfile } from './teacher/types';
+
 // Views
 import { DashboardView } from './teacher/dashboard/DashboardView';
 import { CourseListView } from './teacher/courses/CourseListView';
@@ -40,6 +43,10 @@ import { TeacherProfileView } from './teacher/profile/TeacherProfileView';
 import { TeacherSettingsView } from './teacher/settings/TeacherSettingsView';
 
 export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return localStorage.getItem('mentify_teacher_auth') === 'true';
+  });
+  const [currentTeacher, setCurrentTeacher] = useState<TeacherProfile>(mockTeacherProfile);
   const [currentTab, setCurrentTab] = useState<NavigationTab>('dashboard');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -122,6 +129,24 @@ export default function App() {
     }
   };
 
+  const handleLogin = (profile?: TeacherProfile) => {
+    setIsAuthenticated(true);
+    localStorage.setItem('mentify_teacher_auth', 'true');
+    if (profile) {
+      setCurrentTeacher(profile);
+    }
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    localStorage.removeItem('mentify_teacher_auth');
+    setCurrentTab('dashboard');
+  };
+
+  if (!isAuthenticated) {
+    return <TeacherLoginPage onLogin={handleLogin} />;
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 flex">
       {/* 1. Global Teacher Sidebar */}
@@ -132,7 +157,7 @@ export default function App() {
         onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         isMobileOpen={isMobileSidebarOpen}
         onCloseMobile={() => setIsMobileSidebarOpen(false)}
-        teacher={mockTeacherProfile}
+        teacher={currentTeacher}
         pendingSubmissionsCount={pendingSubmissionsCount}
         unreadMessagesCount={unreadMessagesCount}
         unreadNotificationsCount={unreadNotificationsCount}
@@ -147,7 +172,8 @@ export default function App() {
           onOpenSearch={() => setIsSearchOpen(true)}
           onOpenQuickCreate={handleOpenQuickCreate}
           onToggleMobileMenu={() => setIsMobileSidebarOpen(true)}
-          teacher={mockTeacherProfile}
+          onLogout={handleLogout}
+          teacher={currentTeacher}
           unreadNotificationsCount={unreadNotificationsCount}
         />
 
@@ -243,7 +269,7 @@ export default function App() {
             <TeacherProfileView onNavigate={handleNavigate} />
           )}
 
-          {currentTab === 'settings' && <TeacherSettingsView />}
+          {currentTab === 'settings' && <TeacherSettingsView onLogout={handleLogout} />}
         </main>
       </div>
 
