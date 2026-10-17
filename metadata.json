@@ -1,0 +1,6 @@
+{
+  "name": "Mentify Teacher Portal",
+  "description": "Comprehensive UI/UX workspace for educators to plan, teach, assess, communicate, and monitor student learning.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
