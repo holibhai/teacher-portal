@@ -17,7 +17,9 @@ export type NavigationTab =
   | 'messages'
   | 'ai-assistant'
   | 'profile'
-  | 'settings';
+  | 'settings'
+  | 'admin-materials'
+  | 'student-materials';
 
 export interface TeacherProfile {
   id: string;

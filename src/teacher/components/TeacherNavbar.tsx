@@ -54,6 +54,8 @@ const tabTitles: Record<NavigationTab, { title: string; category: string }> = {
   'ai-assistant': { title: 'Mentify AI Teaching Assistant', category: 'AI Intelligence' },
   profile: { title: 'Teacher Profile', category: 'Account' },
   settings: { title: 'Account Settings & Preferences', category: 'Account' },
+  'admin-materials': { title: 'Admin S3 Storage & Audit Governance', category: 'Administration' },
+  'student-materials': { title: 'Student Learning Materials & Course Pack', category: 'Student View' },
 };
 
 export const TeacherNavbar: React.FC<TeacherNavbarProps> = ({
@@ -121,6 +123,43 @@ export const TeacherNavbar: React.FC<TeacherNavbarProps> = ({
 
       {/* Right zone: Global Search, Quick Create, Actions, Profile */}
       <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+        {/* Role Perspective Quick Switcher */}
+        <div className="hidden xl:flex items-center p-0.5 rounded-lg bg-slate-100 border border-slate-200 text-[11px]">
+          <button
+            type="button"
+            onClick={() => onNavigate('materials')}
+            className={`px-2.5 py-1 rounded-md font-semibold transition-colors cursor-pointer ${
+              currentTab !== 'admin-materials' && currentTab !== 'student-materials'
+                ? 'bg-white text-indigo-700 shadow-2xs'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            Teacher Materials
+          </button>
+          <button
+            type="button"
+            onClick={() => onNavigate('admin-materials')}
+            className={`px-2.5 py-1 rounded-md font-semibold transition-colors cursor-pointer ${
+              currentTab === 'admin-materials'
+                ? 'bg-white text-amber-800 shadow-2xs'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            Admin Materials
+          </button>
+          <button
+            type="button"
+            onClick={() => onNavigate('student-materials')}
+            className={`px-2.5 py-1 rounded-md font-semibold transition-colors cursor-pointer ${
+              currentTab === 'student-materials'
+                ? 'bg-white text-emerald-800 shadow-2xs'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            Student Materials
+          </button>
+        </div>
+
         {/* Global Search Button */}
         <button
           onClick={onOpenSearch}

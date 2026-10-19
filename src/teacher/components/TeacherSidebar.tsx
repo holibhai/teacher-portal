@@ -22,6 +22,8 @@ import {
   ChevronRight,
   LogOut,
   X,
+  Shield,
+  Database,
 } from 'lucide-react';
 import { NavigationTab, TeacherProfile } from '../types';
 
@@ -87,7 +89,13 @@ export const TeacherSidebar: React.FC<TeacherSidebarProps> = ({
         { id: 'students', label: 'My Students', icon: Users, badge: 142 },
         { id: 'enrollments', label: 'Enrollments', icon: UserCheck, badge: 2, badgeColor: 'bg-amber-500 text-white' },
         { id: 'attendance', label: 'Attendance', icon: ClipboardCheck },
-        { id: 'materials', label: 'Learning Materials', icon: FolderOpen },
+        {
+          id: 'materials',
+          label: 'Learning Materials',
+          icon: FolderOpen,
+          badge: 'Active',
+          badgeColor: 'bg-indigo-100 text-indigo-700 font-mono',
+        },
       ],
     },
     {
@@ -123,6 +131,25 @@ export const TeacherSidebar: React.FC<TeacherSidebarProps> = ({
           aiGlow: true,
           badge: 'Pro',
           badgeColor: 'bg-violet-100 text-violet-700 border border-violet-200',
+        },
+      ],
+    },
+    {
+      groupName: 'PERSPECTIVES',
+      items: [
+        {
+          id: 'admin-materials',
+          label: 'Admin Materials',
+          icon: Shield,
+          badge: 'Admin',
+          badgeColor: 'bg-amber-100 text-amber-800 border border-amber-200',
+        },
+        {
+          id: 'student-materials',
+          label: 'Student Course Pack',
+          icon: BookOpen,
+          badge: 'Student',
+          badgeColor: 'bg-emerald-100 text-emerald-800 border border-emerald-200',
         },
       ],
     },

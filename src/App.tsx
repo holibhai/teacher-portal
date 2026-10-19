@@ -42,6 +42,8 @@ import { TeacherAnalyticsView } from './teacher/analytics/TeacherAnalyticsView';
 import { NotificationCenterView } from './teacher/notifications/NotificationCenterView';
 import { TeacherProfileView } from './teacher/profile/TeacherProfileView';
 import { TeacherSettingsView } from './teacher/settings/TeacherSettingsView';
+import { AdminMaterialManagementView } from './admin/materials/AdminMaterialManagementView';
+import { StudentMaterialsView } from './student/materials/StudentMaterialsView';
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
@@ -204,6 +206,32 @@ export default function App() {
 
         {/* View Routing */}
         <main className="flex-1 p-4 lg:p-6 overflow-y-auto">
+          {/* Multi-Role Material Perspective Banner */}
+          {(currentTab === 'admin-materials' || currentTab === 'student-materials') && (
+            <div className="mb-5 p-3 rounded-xl bg-slate-900 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md border border-slate-700 animate-in fade-in">
+              <div className="flex items-center gap-2.5 text-xs">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>
+                  Active Perspective:{' '}
+                  <strong className="text-white font-semibold">
+                    {currentTab === 'admin-materials' ? 'Admin Material Management' : 'Student Learning Pack (Maya Lin)'}
+                  </strong>
+                </span>
+                <span className="text-slate-400 hidden sm:inline">· Material Service Architecture</span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleNavigate('materials')}
+                  className="px-3 py-1 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors cursor-pointer"
+                >
+                  Return to Teacher Workspace
+                </button>
+              </div>
+            </div>
+          )}
+
           {currentTab === 'dashboard' && (
             <DashboardView
               onNavigate={handleNavigate}
@@ -295,6 +323,10 @@ export default function App() {
           )}
 
           {currentTab === 'settings' && <TeacherSettingsView onLogout={handleLogout} />}
+
+          {currentTab === 'admin-materials' && <AdminMaterialManagementView />}
+
+          {currentTab === 'student-materials' && <StudentMaterialsView />}
         </main>
       </div>
 
