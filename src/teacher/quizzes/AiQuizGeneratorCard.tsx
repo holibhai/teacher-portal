@@ -29,6 +29,7 @@ import {
 } from './types';
 import { quizApi } from './api/quizApi';
 import { Course } from '../types';
+import { AiQuizCardSliderModal } from './AiQuizCardSliderModal';
 
 interface AiQuizGeneratorCardProps {
   courses: Course[];
@@ -58,6 +59,7 @@ export const AiQuizGeneratorCard: React.FC<AiQuizGeneratorCardProps> = ({
 
   // Generated Draft State
   const [draft, setDraft] = useState<AiQuizDraftResponse | null>(null);
+  const [isSliderOpen, setIsSliderOpen] = useState<boolean>(false);
   const [draftTitle, setDraftTitle] = useState<string>('');
   const [draftDescription, setDraftDescription] = useState<string>('');
   const [draftDuration, setDraftDuration] = useState<number>(25);
@@ -173,6 +175,7 @@ export const AiQuizGeneratorCard: React.FC<AiQuizGeneratorCardProps> = ({
         setDraftDuration(Math.max(15, generatedDraft.questions.length * 4));
 
         setIsGenerating(false);
+        setIsSliderOpen(true);
       }, 400);
     } catch (err: any) {
       setIsGenerating(false);
@@ -406,7 +409,8 @@ export const AiQuizGeneratorCard: React.FC<AiQuizGeneratorCardProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-indigo-200/80 shadow-md overflow-hidden transition-all">
+    <>
+      <div className="bg-white rounded-2xl border border-indigo-200/80 shadow-md overflow-hidden transition-all">
       {/* Card Header */}
       <div className="px-6 py-5 bg-gradient-to-r from-violet-600 via-indigo-600 to-indigo-700 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-start gap-3.5">
@@ -741,255 +745,109 @@ export const AiQuizGeneratorCard: React.FC<AiQuizGeneratorCardProps> = ({
             )}
           </form>
         ) : (
-          /* STEP 2: GENERATED DRAFT REVIEW & IN-PLACE QUESTION EDITOR */
-          <div className="space-y-6 animate-in fade-in zoom-in-98 duration-200">
-            {/* Draft Metadata Banner */}
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-3">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="px-2.5 py-1 text-xs font-mono font-bold rounded-md bg-violet-100 text-violet-800 border border-violet-200">
-                  {draft.provider}
-                </span>
-                <span className="px-2.5 py-1 text-xs font-mono font-bold rounded-md bg-indigo-100 text-indigo-800 border border-indigo-200">
-                  Difficulty: {draft.difficulty}
-                </span>
-                <span className="px-2.5 py-1 text-xs font-mono font-bold rounded-md bg-emerald-100 text-emerald-800 border border-emerald-200">
-                  {draftQuestions.length} Questions · {totalDraftMarks} Total Marks
-                </span>
+          /* STEP 2: DRAFT GENERATED CONFIRMATION & SLIDER MODAL LAUNCHER */
+          <div className="p-6 rounded-2xl bg-gradient-to-br from-indigo-50/80 via-white to-violet-50/80 border border-indigo-100 space-y-5 animate-in fade-in zoom-in-98 duration-200">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-start gap-3.5">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-violet-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 shrink-0 border border-indigo-400/30">
+                  <Sparkles className="w-6 h-6 text-amber-300" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap mb-1">
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-violet-100 text-violet-800 font-bold border border-violet-200 uppercase">
+                      {draft.provider}
+                    </span>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 font-bold border border-indigo-200">
+                      {courses.find((c) => c.id === selectedCourseId)?.code || 'CS-201'}
+                    </span>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-200">
+                      {draft.difficulty} Difficulty
+                    </span>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-bold border border-amber-200">
+                      {draftQuestions.length} Questions · {totalDraftMarks} Marks
+                    </span>
+                  </div>
+                  <h3 className="text-base font-bold text-slate-900 tracking-tight">
+                    {draftTitle}
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Synthesized from "{selectedFile?.name || sampleDocName}". Review questions and options in the high-level Card Slider above the page.
+                  </p>
+                </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2.5 shrink-0">
                 <button
                   type="button"
                   onClick={handleReset}
-                  className="px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 bg-white border border-slate-200 rounded-lg hover:bg-slate-100 transition-colors flex items-center gap-1.5"
+                  className="px-3.5 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
-                  <span>Discard & Re-generate</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Quiz General Settings Form */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 rounded-xl border border-slate-200 bg-white">
-              <div className="md:col-span-6">
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Quiz Title <span className="text-slate-400 font-normal">({draftTitle.length}/150)</span>
-                </label>
-                <input
-                  type="text"
-                  maxLength={150}
-                  value={draftTitle}
-                  onChange={(e) => setDraftTitle(e.target.value)}
-                  className="w-full px-3 py-2 text-xs font-semibold text-slate-900 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20"
-                />
-              </div>
-
-              <div className="md:col-span-3">
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Time Limit (Minutes)
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  value={draftDuration}
-                  onChange={(e) => setDraftDuration(Number(e.target.value) || 20)}
-                  className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-hidden"
-                />
-              </div>
-
-              <div className="md:col-span-3">
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Pass Mark (Points)
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  max={totalDraftMarks}
-                  value={draftPassMark}
-                  onChange={(e) => setDraftPassMark(Number(e.target.value) || 0)}
-                  className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-hidden"
-                />
-              </div>
-
-              <div className="md:col-span-12">
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Description & Student Guidance
-                </label>
-                <input
-                  type="text"
-                  value={draftDescription}
-                  onChange={(e) => setDraftDescription(e.target.value)}
-                  className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-hidden"
-                />
-              </div>
-            </div>
-
-            {/* Generated Question Cards List */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-                  <Layers className="w-4 h-4 text-indigo-600" />
-                  <span>Generated Questions ({draftQuestions.length})</span>
-                </h3>
-                <span className="text-[11px] text-slate-500">
-                  Select the radio button next to an option to designate the single correct answer.
-                </span>
-              </div>
-
-              {draftQuestions.map((q, qIdx) => (
-                <div
-                  key={q.id || qIdx}
-                  className="p-5 rounded-xl border border-slate-200 hover:border-slate-300 transition-all bg-white shadow-2xs space-y-3"
-                >
-                  {/* Question Header & Order */}
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-start gap-2.5 flex-1">
-                      <span className="w-6 h-6 rounded-md bg-indigo-50 text-indigo-700 font-mono text-xs font-bold flex items-center justify-center shrink-0 border border-indigo-100 mt-1">
-                        {qIdx + 1}
-                      </span>
-                      <div className="flex-1">
-                        <textarea
-                          rows={2}
-                          value={q.questionText}
-                          onChange={(e) => handleUpdateQuestionText(qIdx, e.target.value)}
-                          className="w-full px-3 py-1.5 text-xs font-semibold text-slate-900 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 shrink-0">
-                      <div className="flex items-center gap-1">
-                        <span className="text-[11px] text-slate-400 font-mono">Marks:</span>
-                        <input
-                          type="number"
-                          min="0.1"
-                          step="0.5"
-                          value={q.marks}
-                          onChange={(e) => handleUpdateMarks(qIdx, Number(e.target.value))}
-                          className="w-16 px-2 py-1 text-xs font-mono font-bold text-indigo-700 border border-slate-200 rounded-md focus:outline-hidden text-center"
-                        />
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteQuestion(qIdx)}
-                        className="p-1.5 text-slate-400 hover:text-rose-600 rounded-md hover:bg-slate-100 transition-colors"
-                        title="Delete question"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Options (min 4, max 5) */}
-                  <div className="space-y-2 pl-8">
-                    <div className="flex items-center justify-between text-[11px] text-slate-400">
-                      <span>Options ({q.options.length}/5 — 1 correct required)</span>
-                      {q.options.length < 5 && (
-                        <button
-                          type="button"
-                          onClick={() => handleAddOption(qIdx)}
-                          className="text-xs text-indigo-600 hover:underline flex items-center gap-1"
-                        >
-                          <Plus className="w-3 h-3" />
-                          <span>Add Option</span>
-                        </button>
-                      )}
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      {q.options.map((opt, optIdx) => (
-                        <div
-                          key={opt.id || optIdx}
-                          className={`p-2.5 rounded-lg border text-xs flex items-center gap-2.5 transition-all ${
-                            opt.correct
-                              ? 'bg-emerald-50/70 border-emerald-300 ring-1 ring-emerald-400/40'
-                              : 'bg-slate-50 border-slate-200'
-                          }`}
-                        >
-                          <input
-                            type="radio"
-                            name={`correct-radio-${qIdx}`}
-                            checked={opt.correct}
-                            onChange={() => handleSelectCorrectOption(qIdx, optIdx)}
-                            className="text-emerald-600 focus:ring-emerald-500 shrink-0 cursor-pointer"
-                          />
-                          <input
-                            type="text"
-                            value={opt.optionText}
-                            onChange={(e) =>
-                              handleUpdateOptionText(qIdx, optIdx, e.target.value)
-                            }
-                            className={`flex-1 bg-transparent border-0 text-xs focus:outline-hidden font-medium ${
-                              opt.correct ? 'text-emerald-950 font-bold' : 'text-slate-800'
-                            }`}
-                          />
-                          {q.options.length > 4 && (
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveOption(qIdx, optIdx)}
-                              className="text-slate-400 hover:text-rose-500 p-0.5"
-                              title="Remove option"
-                            >
-                              <X className="w-3.5 h-3.5" />
-                            </button>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Rationale / Explanation */}
-                  {q.explanation && (
-                    <div className="pl-8 pt-1">
-                      <div className="text-[11px] text-slate-500 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
-                        <strong className="text-slate-700">AI Pedagogical Rationale: </strong>
-                        {q.explanation}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {/* Bottom Actions: Save as Draft vs Publish */}
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="text-xs text-slate-500">
-                <span>Total: </span>
-                <strong className="text-slate-900 font-mono">
-                  {draftQuestions.length} Questions · {totalDraftMarks} Marks · Pass: {draftPassMark} Marks
-                </strong>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  disabled={isSaving || isPublishing}
-                  onClick={handleSaveDraft}
-                  className="px-4 py-2 text-xs font-bold text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl shadow-xs transition-colors disabled:opacity-50 flex items-center gap-1.5"
-                >
-                  {isSaving ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : null}
-                  <span>Save as Draft</span>
+                  <span>New Document</span>
                 </button>
 
                 <button
                   type="button"
-                  disabled={isSaving || isPublishing}
-                  onClick={handlePublishQuiz}
-                  className="px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 rounded-xl shadow-xs transition-colors disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
+                  onClick={() => setIsSliderOpen(true)}
+                  className="px-5 py-2.5 text-xs font-bold text-white bg-gradient-to-r from-violet-600 via-indigo-600 to-indigo-700 hover:from-violet-500 hover:to-indigo-600 rounded-xl shadow-md shadow-indigo-500/25 transition-all flex items-center gap-2 cursor-pointer active:scale-98"
                 >
-                  {isPublishing ? (
-                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                  ) : (
-                    <Send className="w-3.5 h-3.5" />
-                  )}
-                  <span>Publish to Course Students</span>
+                  <Sparkles className="w-4 h-4 text-amber-300" />
+                  <span>Open Question Card Slider ({draftQuestions.length})</span>
                 </button>
+              </div>
+            </div>
+
+            {/* Quick overview cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+              <div className="p-3 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+                <span className="text-[10px] uppercase font-bold text-slate-400">Total Questions</span>
+                <p className="text-lg font-bold font-mono text-slate-900 mt-0.5">{draftQuestions.length}</p>
+              </div>
+              <div className="p-3 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+                <span className="text-[10px] uppercase font-bold text-slate-400">Total Marks</span>
+                <p className="text-lg font-bold font-mono text-indigo-600 mt-0.5">{totalDraftMarks} pts</p>
+              </div>
+              <div className="p-3 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+                <span className="text-[10px] uppercase font-bold text-slate-400">Time Limit</span>
+                <p className="text-lg font-bold font-mono text-slate-900 mt-0.5">{draftDuration} mins</p>
+              </div>
+              <div className="p-3 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+                <span className="text-[10px] uppercase font-bold text-slate-400">Pass Mark</span>
+                <p className="text-lg font-bold font-mono text-emerald-600 mt-0.5">{draftPassMark} pts</p>
               </div>
             </div>
           </div>
         )}
       </div>
     </div>
+
+    {/* CARD SLIDER MODAL OVERLAY (Above the page with background blur) */}
+      {isSliderOpen && draft && (
+        <AiQuizCardSliderModal
+          draft={draft}
+          initialTitle={draftTitle}
+          initialDescription={draftDescription}
+          initialDuration={draftDuration}
+          initialPassMark={draftPassMark}
+          course={courses.find((c) => c.id === selectedCourseId)}
+          sourceFileName={selectedFile?.name || sampleDocName}
+          onClose={() => setIsSliderOpen(false)}
+          onSaveDraft={(savedQuiz) => {
+            setIsSliderOpen(false);
+            onQuizCreated(savedQuiz);
+            handleReset();
+          }}
+          onPublish={(publishedQuiz) => {
+            setIsSliderOpen(false);
+            onQuizCreated(publishedQuiz);
+            handleReset();
+          }}
+          onRegenerate={() => {
+            setIsSliderOpen(false);
+            handleReset();
+          }}
+        />
+      )}
+    </>
   );
 };

@@ -27,6 +27,7 @@ import { StatusBadge } from '../components/StatusBadge';
 import { QuestionBuilderModal } from './QuestionBuilderModal';
 import { CreateQuizModal } from './CreateQuizModal';
 import { AiQuizGeneratorCard } from './AiQuizGeneratorCard';
+import { AiQuizCardSliderModal } from './AiQuizCardSliderModal';
 import { BackendQuizItem } from './types';
 import { quizApi } from './api/quizApi';
 
@@ -52,6 +53,7 @@ export const QuizDashboardView: React.FC<QuizDashboardViewProps> = ({
   const [isAiGeneratorOpen, setIsAiGeneratorOpen] = useState(false);
   const [isCreateQuizOpen, setIsCreateQuizOpen] = useState(false);
   const [isQuestionBuilderOpen, setIsQuestionBuilderOpen] = useState(false);
+  const [sliderPreviewQuiz, setSliderPreviewQuiz] = useState<Quiz | null>(null);
   const [toastMsg, setToastMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const showToast = (text: string, type: 'success' | 'error' = 'success') => {
@@ -399,6 +401,18 @@ export const QuizDashboardView: React.FC<QuizDashboardViewProps> = ({
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
+                  {/* Card Slider Preview Button */}
+                  {selectedQuiz.questions.length > 0 && (
+                    <button
+                      onClick={() => setSliderPreviewQuiz(selectedQuiz)}
+                      className="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg shadow-2xs transition-colors flex items-center gap-1.5 cursor-pointer"
+                      title="Preview quiz questions in Card Slider view"
+                    >
+                      <Eye className="w-3.5 h-3.5 text-indigo-600" />
+                      <span>Card Slider</span>
+                    </button>
+                  )}
+
                   {/* Publish button if in Draft */}
                   {selectedQuiz.status === 'Draft' && (
                     <button
@@ -566,6 +580,52 @@ export const QuizDashboardView: React.FC<QuizDashboardViewProps> = ({
           quizId={selectedQuiz.id}
           onClose={() => setIsQuestionBuilderOpen(false)}
           onSaveQuestion={handleSaveQuestion}
+        />
+      )}
+
+      {/* Card Slider Modal for Previewing / Editing Any Quiz */}
+      {sliderPreviewQuiz && (
+        <AiQuizCardSliderModal
+          draft={{
+            courseId: sliderPreviewQuiz.courseId,
+            questionCount: sliderPreviewQuiz.questions.length,
+            difficulty: 'MEDIUM',
+            questionType: 'MULTIPLE_CHOICE_SINGLE_ANSWER',
+            creationMethod: 'AI_GENERATED',
+            questions: sliderPreviewQuiz.questions.map((q, idx) => ({
+              id: q.id,
+              questionText: q.question,
+              questionType: 'MULTIPLE_CHOICE_SINGLE_ANSWER',
+              marks: q.marks,
+              questionOrder: idx + 1,
+              options: (q.options || []).map((optText, optIdx) => ({
+                id: `opt-${idx}-${optIdx}`,
+                optionText: optText,
+                correct: optText === q.correctAnswer,
+                optionOrder: optIdx + 1,
+              })),
+              explanation: q.explanation,
+            })),
+            provider: 'Mentify Assessment Engine',
+            model: 'assignment-service',
+            generatedAt: new Date().toISOString(),
+            saved: true,
+            published: sliderPreviewQuiz.status === 'Active',
+          }}
+          initialTitle={sliderPreviewQuiz.title}
+          initialDescription={sliderPreviewQuiz.description || ''}
+          initialDuration={sliderPreviewQuiz.durationMinutes}
+          initialPassMark={Math.round(sliderPreviewQuiz.totalMarks * 0.6)}
+          course={mockCourses.find((c) => c.id === sliderPreviewQuiz.courseId)}
+          onClose={() => setSliderPreviewQuiz(null)}
+          onSaveDraft={(updated) => {
+            handleQuizCreated(updated);
+            setSliderPreviewQuiz(null);
+          }}
+          onPublish={(updated) => {
+            handleQuizCreated(updated);
+            setSliderPreviewQuiz(null);
+          }}
         />
       )}
     </div>
